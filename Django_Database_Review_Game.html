@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Django Database — Class Review Exam</title>
+<style>
+:root{
+ --bg:#050b16;--panel:#0c1728;--panel2:#11233a;--line:rgba(255,255,255,.11);
+ --text:#f7faff;--muted:#9fb2ca;--cyan:#61ddff;--violet:#8d7cff;
+ --green:#49e19b;--red:#ff6d8e;--gold:#ffd166;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:
+radial-gradient(circle at 15% 0%,rgba(97,221,255,.10),transparent 30%),
+radial-gradient(circle at 90% 15%,rgba(141,124,255,.13),transparent 28%),var(--bg);color:var(--text)}
+button,select,input{font:inherit}
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px}
+.card{width:min(1120px,100%);background:rgba(12,23,40,.94);border:1px solid var(--line);
+border-radius:28px;box-shadow:0 30px 100px rgba(0,0,0,.35);backdrop-filter:blur(16px)}
+.hidden{display:none!important}
+.start{padding:42px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid rgba(97,221,255,.28);
+border-radius:999px;color:var(--cyan);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+h1{font-size:clamp(36px,6vw,68px);line-height:.98;margin:18px 0 12px;letter-spacing:-.04em}
+h2{font-size:30px;margin:0 0 10px}.sub{color:var(--muted);line-height:1.7;max-width:800px}
+.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-top:28px}
+.panel{padding:22px;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:20px}
+label{display:block;color:var(--muted);font-size:13px;font-weight:700;margin-bottom:8px}
+select{width:100%;padding:14px 15px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+.mode-list{display:grid;gap:9px;margin-top:12px}
+.mode{padding:13px 14px;border:1px solid var(--line);border-radius:14px;color:#dbe8f7;background:rgba(255,255,255,.025)}
+.mode b{display:block;color:white;margin-bottom:3px}.mode span{font-size:12px;color:var(--muted)}
+.start-btn{margin-top:16px;width:100%;padding:15px 18px;border:0;border-radius:14px;
+background:linear-gradient(135deg,#16a9d8,#725de7);color:white;font-weight:900;cursor:pointer;font-size:16px}
+.cover-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}
+.cover-grid div{padding:12px;border-radius:13px;background:rgba(255,255,255,.035);border:1px solid var(--line);font-size:12px;color:#cbd8e8}
+.cover-grid b{display:block;color:var(--cyan);font-size:18px;margin-bottom:2px}
+#gameScreen,#resultScreen{position:fixed;inset:0;z-index:9999;background:var(--bg);overflow:auto;padding:22px}
+.game-wrap{width:min(1120px,100%);margin:auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
+.topbar .tiny{color:var(--muted);font-size:13px}
+.score{font-weight:900}.score span{color:var(--cyan)}
+.progress{height:7px;background:#020711;border-radius:999px;overflow:hidden;margin-bottom:22px}
+.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--violet));transition:.3s}
+.quiz-card{padding:32px}
+.qmeta{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.topic{font-size:12px;font-weight:900;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase}
+.qtype{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:6px 9px;border-radius:999px}
+.question{font-size:clamp(25px,4vw,42px);line-height:1.16;margin:15px 0 25px;letter-spacing:-.025em}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{min-height:68px;text-align:left;padding:14px;border-radius:15px;border:1px solid var(--line);background:var(--panel2);
+color:white;display:flex;gap:12px;align-items:center;cursor:pointer;font-weight:700}
+.opt:hover{border-color:rgba(97,221,255,.45);transform:translateY(-1px)}
+.opt:disabled{cursor:default;transform:none}
+.letter{width:31px;height:31px;border-radius:10px;background:rgba(255,255,255,.08);display:grid;place-items:center;color:var(--cyan);flex:none}
+.correct{border-color:rgba(73,225,155,.7)!important;background:rgba(73,225,155,.10)!important}
+.wrong{border-color:rgba(255,109,142,.7)!important;background:rgba(255,109,142,.10)!important}
+.feedback{margin-top:18px;padding:16px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);
+line-height:1.65;color:#dbe7f5}.feedback b{color:white}
+.bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px}
+.next{padding:13px 18px;border:0;border-radius:13px;background:linear-gradient(135deg,#168fbf,#6456d7);color:white;font-weight:900;cursor:pointer}
+.next:disabled{opacity:.45;cursor:not-allowed}
+.match-grid{display:grid;gap:10px}
+.match-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center}
+.match-row .left{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035);font-weight:700}
+.match-row select{padding:12px}
+.submit-type{margin-top:14px;padding:12px 16px;border:1px solid var(--line);background:var(--panel2);color:white;border-radius:12px;font-weight:800;cursor:pointer}
+.short-input{width:100%;padding:17px;border:1px solid var(--line);background:var(--panel2);color:white;border-radius:15px;outline:none}
+.short-input:focus{border-color:rgba(97,221,255,.7)}
+.order-list{display:grid;gap:9px}
+.order-item{padding:15px;border:1px solid var(--line);background:var(--panel2);border-radius:14px;cursor:pointer;font-weight:750}
+.order-item.selected{border-color:rgba(97,221,255,.75);background:rgba(97,221,255,.09)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
+.result{padding:40px;text-align:center}
+.final-score{font-size:78px;font-weight:950;line-height:1;margin:15px 0}
+.result-note{color:var(--muted);line-height:1.7}
+.breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:left;margin-top:24px}
+.breakdown div{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)}
+.breakdown b{display:block;margin-bottom:4px}.breakdown span{color:var(--muted);font-size:13px}
+.result-actions{display:flex;justify-content:center;gap:10px;margin-top:25px;flex-wrap:wrap}
+.result-actions button{padding:13px 18px;border-radius:13px;border:1px solid var(--line);background:var(--panel2);color:white;font-weight:800;cursor:pointer}
+.result-actions .primary{border:0;background:linear-gradient(135deg,#168fbf,#6456d7)}
+.note{margin-top:18px;color:#7086a2;text-align:center;font-size:11px}
+@media(max-width:760px){
+ .hero-grid,.options,.breakdown{grid-template-columns:1fr}
+ .start{padding:25px}.quiz-card{padding:22px}
+ .match-row{grid-template-columns:1fr}
+ .cover-grid{grid-template-columns:1fr 1fr}
+ .brand{align-items:flex-start;flex-direction:column}
+}
+
+/* Clear, high-contrast interaction for ordering/matching cards */
+.order-item, .sort-item, .match-item {
+  color: #f7fbff !important;
+  background: #162b45 !important;
+  border: 2px solid rgba(100,216,255,.28) !important;
+  text-shadow: none !important;
+}
+.order-item:hover, .sort-item:hover, .match-item:hover {
+  background: #1e3b5c !important;
+  border-color: rgba(100,216,255,.7) !important;
+}
+.order-item.selected, .sort-item.selected, .match-item.selected,
+.order-item.active, .sort-item.active, .match-item.active {
+  color: #07111f !important;
+  background: #64d8ff !important;
+  border-color: #b9efff !important;
+  font-weight: 800 !important;
+}
+.order-item.correct, .sort-item.correct, .match-item.correct {
+  color: #07111f !important;
+  background: #48e39a !important;
+  border-color: #b7ffdd !important;
+}
+.order-item.wrong, .sort-item.wrong, .match-item.wrong {
+  color: #fff !important;
+  background: #8f3450 !important;
+  border-color: #ff8eaa !important;
+}
+
+</style>
+</head>
+<body>
+<section id="startScreen" class="screen">
+  <div class="card start">
+    <div class="brand">
+      <div>
+        <span class="badge">Django • Database • Class Review</span>
+        <h1>THE DATABASE<br>CHALLENGE</h1>
+        <p class="sub">A source-based interactive exam built from the uploaded course slides. It mixes multiple choice,
+        scenarios, matching, ordering, and short written answers — like a real revision assessment.</p>
+      </div>
+      <div class="badge">185-question bank</div>
+    </div>
+
+    <div class="hero-grid">
+      <div class="panel">
+        <h2>Choose your review</h2>
+        <label for="modeSelect">Mode</label>
+        <select id="modeSelect">
+          <option value="exam">Class Exam — 45 balanced questions</option>
+          <option value="full">Full Review — entire question bank</option>
+          <option value="topic">Topic Practice — choose one topic</option>
+        </select>
+        <div id="topicBox" class="hidden" style="margin-top:12px">
+          <label for="topicSelect">Topic</label>
+          <select id="topicSelect"></select>
+        </div>
+        <button class="start-btn" id="startBtn">Start Challenge →</button>
+      </div>
+      <div class="panel">
+        <h2>Question styles</h2>
+        <div class="mode-list">
+          <div class="mode"><b>Multiple Choice</b><span>Concepts, comparisons, commands and field behavior.</span></div>
+          <div class="mode"><b>Scenario Questions</b><span>Apply the slide rules to realistic Django/database situations.</span></div>
+          <div class="mode"><b>Match & Connect</b><span>Pair concepts with their exact meaning or Django feature.</span></div>
+          
+          <div class="mode"><b>Put in Order</b><span>Test workflows such as migrations and relational modeling.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cover-grid">
+      <div><b>17</b>Database & RDBMS</div>
+      <div><b>19</b>Relational Design</div>
+      <div><b>23</b>Django Models</div>
+      <div><b>20</b>Meta & Constraints</div>
+      <div><b>19</b>Relationships</div>
+      <div><b>20</b>Migrations</div>
+      <div><b>23</b>CRUD</div>
+      <div><b>28</b>QuerySets</div>
+      <div><b>16</b>Exam Challenge</div>
+    </div>
+    <div class="note">Course-source content only • Designed as a class revision activity • No external material added</div>
+  </div>
+</section>
+
+<section id="gameScreen" class="hidden">
+ <div class="game-wrap">
+  <div class="topbar">
+    <div class="tiny" id="counter">Question 1</div>
+    <div class="score">Score: <span id="score">0</span></div>
+  </div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <div class="card quiz-card">
+    <div class="qmeta"><div class="topic" id="topic"></div><div class="qtype" id="qtype"></div></div>
+    <div class="question" id="question"></div>
+    <div id="answerArea"></div>
+    <div id="feedback" class="feedback hidden"></div>
+    <div class="bottom">
+      <div class="tiny" id="status" style="color:var(--muted)">Choose your answer</div>
+      <button id="nextBtn" class="next" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="note">Exam-style revision • Read the feedback before moving on</div>
+ </div>
+</section>
+
+<section id="resultScreen" class="screen hidden">
+ <div class="card result">
+   <span class="badge">Challenge Complete</span>
+   <div class="final-score" id="finalScore">0 / 0</div>
+   <h2 id="resultTitle"></h2>
+   <p class="result-note" id="resultNote"></p>
+   <div class="breakdown" id="breakdown"></div>
+   <div class="result-actions">
+     <button class="primary" id="againBtn">Play Again</button>
+     <button id="homeBtn">Back to Start</button>
+   </div>
+ </div>
+</section>
+
+<script>
+const BANK = [{"type":"mc","topic":"Database & RDBMS","q":"What is the main purpose of a database?","options":["Hold organized persistent application data","Replace Python classes","Render HTML pages","Run the browser"],"answer":0,"explain":"The slides describe a database as organized structures that hold application data."},{"type":"mc","topic":"Database & RDBMS","q":"What does a DBMS do?","options":["Creates, reads, updates, protects, and coordinates access to databases","Only stores images","Only defines HTML","Only creates Python classes"],"answer":0,"explain":"The DBMS is the software layer that manages access to stored data."},{"type":"mc","topic":"Database & RDBMS","q":"Which statement matches the slide's definition of an RDBMS?","options":["A DBMS that stores related data in tables and enforces rules between them","A text-file storage format","A Python package manager","A browser database with no schema"],"answer":0,"explain":"The slide explicitly describes RDBMSs as relational DBMSs with tables and rules between them."},{"type":"mc","topic":"Database & RDBMS","q":"In a relational table, what is a row?","options":["One complete record","A field definition","A database server","A SQL command"],"answer":0,"explain":"The table anatomy slide defines a row as one complete record."},{"type":"mc","topic":"Database & RDBMS","q":"In a relational table, what is a column?","options":["One defined attribute shared by records","One whole database","A migration file","A QuerySet"],"answer":0,"explain":"Columns represent defined attributes such as name or email."},{"type":"mc","topic":"Database & RDBMS","q":"What problem does persistence solve?","options":["Data remains available after requests and restarts","It makes every value unique","It removes relationships","It converts SQL into HTML"],"answer":0,"explain":"The persistence slide contrasts temporary variables with database storage that survives requests and restarts."},{"type":"mc","topic":"Database & RDBMS","q":"Which is a primary key requirement shown in the slides?","options":["It uniquely identifies a row and cannot be missing","It must contain an email address","It must be a foreign key","It may repeat freely"],"answer":0,"explain":"The primary-key slide states that the value uniquely identifies the row and cannot be missing."},{"type":"mc","topic":"Database & RDBMS","q":"What is the role of a foreign key?","options":["It stores a reference to a related record","It guarantees every value is unique","It sorts rows","It stores CSS"],"answer":0,"explain":"The foreign-key slide describes it as the connection to another table's primary key."},{"type":"mc","topic":"Database & RDBMS","q":"Which constraint means a value cannot appear twice?","options":["UNIQUE","CHECK","NOT NULL","FOREIGN KEY"],"answer":0,"explain":"UNIQUE prevents repeated values or combinations."},{"type":"mc","topic":"Database & RDBMS","q":"Which constraint requires a value to exist?","options":["NOT NULL","UNIQUE","CHECK","ORDER BY"],"answer":0,"explain":"NOT NULL means the required column cannot be NULL."},{"type":"mc","topic":"Database & RDBMS","q":"Which constraint requires a row to satisfy a condition?","options":["CHECK","UNIQUE","PRIMARY KEY","SELECT"],"answer":0,"explain":"CHECK enforces a condition on stored values."},{"type":"mc","topic":"Database & RDBMS","q":"Which is an example of domain integrity from the slides?","options":["Course capacity cannot contain a negative number","Two students share one primary key","An enrollment points to a deleted student","Every table must have the same columns"],"answer":0,"explain":"Domain integrity means values follow the permitted type/range rules."},{"type":"match","topic":"Database & RDBMS","q":"Match the database concept to its role.","pairs":[["Primary key","Uniquely identifies a row in its own table"],["Foreign key","References a related record"],["UNIQUE","Prevents a value/combination from repeating"],["CHECK","Requires a condition to be satisfied"]],"explain":"The slides separate identity, relationship, uniqueness, and value-condition rules."},{"type":"tf","topic":"Database & RDBMS","q":"True or False: Persistence means data remains stored after the request/process that handled it ends.","explain":"Persistence means the data outlives the request/process that handled it and remains stored.","answer":true},{"type":"tf","topic":"Database & RDBMS","q":"True or False: CRUD stands for Create, Read, Update, Delete.","explain":"The slides map CRUD to Create, Read, Update, Delete.","answer":true},{"type":"scenario","topic":"Database & RDBMS","q":"A new enrollment contains student_id=999, but student 999 does not exist. Which integrity rule is being protected?","options":["Referential integrity","Entity integrity","Domain integrity","Presentation integrity"],"answer":0,"explain":"Referential integrity requires relationships to point to existing referenced records."},{"type":"order","topic":"Database & RDBMS","q":"Put the persistence flow in the same conceptual direction as the slides.","items":["Application request","DBMS handles the request","Database stores the record","Record remains available later"],"answer":[0,1,2,3],"explain":"The slides describe the application communicating with the DBMS, which manages persistent stored records."},{"type":"mc","topic":"Relational Design","q":"What should come first in relational design?","options":["Understand the business requirements","Add indexes everywhere","Write templates","Choose CSS classes"],"answer":0,"explain":"The core rule is: understand the business first, then draw the data structure."},{"type":"mc","topic":"Relational Design","q":"What is an entity?","options":["A type of thing the system stores","A single cell","A SQL operator","A migration command"],"answer":0,"explain":"The entity slide describes a type of thing with its own identity, facts, and relationships."},{"type":"mc","topic":"Relational Design","q":"What is an attribute?","options":["A fact that describes an entity","A separate database server","A relationship table only","A primary key command"],"answer":0,"explain":"Attributes are facts that describe each entity."},{"type":"mc","topic":"Relational Design","q":"Which is a strong reason for treating something as its own entity?","options":["It has its own identity, facts, relationships, and lifecycle","It is always a single descriptive value","It only appears once in a sentence","It has no independent meaning"],"answer":0,"explain":"The slides give independence, identity, attributes, references, and lifecycle as entity signals."},{"type":"mc","topic":"Relational Design","q":"Which relationship is one-to-many?","options":["One instructor teaches many courses","One user has one profile","Many students join many courses","One appointment has exactly one ID"],"answer":0,"explain":"The slides use Instructor→Course as a one-to-many example."},{"type":"mc","topic":"Relational Design","q":"Which relationship is many-to-many?","options":["Students and Courses","User and UserProfile","Patient and MedicalProfile","One order and one customer"],"answer":0,"explain":"Students can join many courses and courses can contain many students."},{"type":"mc","topic":"Relational Design","q":"How is a many-to-many relationship resolved in a relational design?","options":["Use a linking entity/table","Put all IDs in one text field","Remove one side","Use only a primary key"],"answer":0,"explain":"The Enrollment example resolves Student↔Course into two one-to-many relationships."},{"type":"mc","topic":"Relational Design","q":"What does 0..1 mean?","options":["Zero or one","Exactly one","Zero or many","One or many"],"answer":0,"explain":"The cardinality slide maps 0..1 to zero or one."},{"type":"mc","topic":"Relational Design","q":"What does 0..* mean?","options":["Zero or many","Exactly one","One or many","Exactly two"],"answer":0,"explain":"The cardinality slide uses 0..* for zero or many."},{"type":"mc","topic":"Relational Design","q":"Why is a stable primary key preferred over an email address as identity?","options":["Descriptive values can change while the stable ID can remain the same","Emails are always invalid","Primary keys are optional","Email can never be unique"],"answer":0,"explain":"The stable-identity slide explains that email addresses may change, while a stable ID keeps references consistent."},{"type":"mc","topic":"Relational Design","q":"What is an ERD used to show?","options":["Tables/entities, keys, relationships, and cardinalities","Only CSS layout","Only Python methods","Only database passwords"],"answer":0,"explain":"The ERD slide identifies entity boxes, keys, relationship lines, and cardinality."},{"type":"mc","topic":"Relational Design","q":"Which normalization problem happens when changing one fact requires changing several repeated rows?","options":["Update anomaly","Insert anomaly","Delete anomaly","Routing anomaly"],"answer":0,"explain":"Repeated facts can create update anomalies."},{"type":"mc","topic":"Relational Design","q":"Which normal form idea in the slides says to keep one value in each cell?","options":["First normal form","Second normal form","Third normal form","Zero normal form"],"answer":0,"explain":"The 1NF slide says to keep one value in each cell and avoid repeated columns."},{"type":"mc","topic":"Relational Design","q":"What is the plain-English practical test for normalization?","options":["Store each fact once under the entity it describes","Put every fact in every table","Avoid all foreign keys","Use one huge table"],"answer":0,"explain":"The slides summarize normalization as storing each fact once under the entity it truly describes."},{"type":"match","topic":"Relational Design","q":"Match the relationship/cardinality notation.","pairs":[["1","Exactly one"],["0..1","Zero or one"],["0..*","Zero or many"],["1..*","One or many"]],"explain":"These are the four cardinality examples shown."},{"type":"match","topic":"Relational Design","q":"Match the design concept to the example.","pairs":[["Entity","Student"],["Attribute","email"],["Record","Student 101"],["ERD","Visual database plan"]],"explain":"The slides distinguish entity, attribute, record, and ERD."},{"type":"tf","topic":"Relational Design","q":"True or False: Normalization reduces repeated facts by separating data into related structures.","explain":"The relational design material uses Enrollment as the relationship and avoids duplicating Student/Course facts.","answer":true},{"type":"scenario","topic":"Relational Design","q":"A course can exist before an instructor is assigned. Which relationship property does that describe?","options":["Optional relationship","Exactly-one relationship","Primary key","Normalization"],"answer":0,"explain":"The exercise explicitly includes an optional instructor relationship."},{"type":"order","topic":"Relational Design","q":"Put the practical modeling sequence in order.","items":["Read requirements","Identify entities","Assign attributes","Choose keys","Define relationships","Test scenarios"],"answer":[0,1,2,3,4,5],"explain":"This matches the practical modeling sequence slide."},{"type":"mc","topic":"Django Models & Fields","q":"What does a Django model class represent?","options":["A database table concept","A browser window","A CSS component","A migration command only"],"answer":0,"explain":"The slides map a model class to a relational table concept."},{"type":"mc","topic":"Django Models & Fields","q":"Which field is for short/limited text with a required maximum length?","options":["CharField","TextField","FloatField","DateField"],"answer":0,"explain":"CharField is shown for short text and requires max_length."},{"type":"mc","topic":"Django Models & Fields","q":"Which field is for longer content such as descriptions or notes?","options":["TextField","CharField","SlugField","BooleanField"],"answer":0,"explain":"TextField is shown for longer text."},{"type":"mc","topic":"Django Models & Fields","q":"Which field is described as URL-friendly text?","options":["SlugField","EmailField","TextField","FloatField"],"answer":0,"explain":"SlugField is shown as URL-friendly text such as slugs."},{"type":"mc","topic":"Django Models & Fields","q":"Which field is specialized for email values with validation support?","options":["EmailField","CharField","IntegerField","DateField"],"answer":0,"explain":"The text field slide identifies EmailField as specialized text with validation support."},{"type":"mc","topic":"Django Models & Fields","q":"Which field is used for a fixed decimal precision such as money?","options":["DecimalField","FloatField","IntegerField","BooleanField"],"answer":0,"explain":"The numeric fields slide presents DecimalField for fixed decimal precision."},{"type":"mc","topic":"Django Models & Fields","q":"Which field stores whole numbers that may be positive or negative?","options":["IntegerField","DecimalField","FloatField","DateField"],"answer":0,"explain":"IntegerField stores whole numbers."},{"type":"mc","topic":"Django Models & Fields","q":"Which field is specifically for non-negative whole numbers in the examples?","options":["PositiveIntegerField","FloatField","TextField","SlugField"],"answer":0,"explain":"The Product examples use PositiveIntegerField for stock."},{"type":"mc","topic":"Django Models & Fields","q":"Which field stores true/false state?","options":["BooleanField","DateField","IntegerField","JSONField"],"answer":0,"explain":"BooleanField stores true/false state."},{"type":"mc","topic":"Django Models & Fields","q":"What does auto_now_add do?","options":["Records creation time automatically","Updates on every save","Makes the field unique","Creates a primary key"],"answer":0,"explain":"The slides state that auto_now_add records creation time."},{"type":"mc","topic":"Django Models & Fields","q":"What does auto_now do?","options":["Updates the timestamp automatically when the object is saved","Records only the original creation time","Creates an index","Allows NULL"],"answer":0,"explain":"The automatic timestamp examples distinguish auto_now from auto_now_add."},{"type":"mc","topic":"Django Models & Fields","q":"Which field stores JSON-style structured data?","options":["JSONField","TextField","SlugField","ImageField"],"answer":0,"explain":"JSONField is listed for structured JSON-like data."},{"type":"mc","topic":"Django Models & Fields","q":"Which field requires Pillow in the slide notes?","options":["ImageField","FileField","JSONField","UUIDField"],"answer":0,"explain":"The ImageField slide notes image validation requires Pillow."},{"type":"mc","topic":"Django Models & Fields","q":"What is the difference between null and blank?","options":["null concerns database storage; blank concerns validation/forms","They are identical","null is only for CSS","blank creates a primary key"],"answer":0,"explain":"The null/blank slide explicitly separates database storage from validation."},{"type":"mc","topic":"Django Models & Fields","q":"Which option makes a field's value unique?","options":["unique=True","blank=True","editable=False","db_index=True"],"answer":0,"explain":"The common field options slide defines unique as the database uniqueness rule."},{"type":"mc","topic":"Django Models & Fields","q":"Which option supplies a value when none is provided?","options":["default","unique","editable","db_index"],"answer":0,"explain":"default provides the value used when none is supplied."},{"type":"mc","topic":"Django Models & Fields","q":"Which option controls whether a field is included in forms such as ModelForm?","options":["editable","default","unique","max_length"],"answer":0,"explain":"The field options slide identifies editable as controlling form inclusion."},{"type":"match","topic":"Django Models & Fields","q":"Match each field with its main use.","pairs":[["CharField","Short/limited text"],["TextField","Long text"],["DecimalField","Fixed decimal precision"],["BooleanField","True/false state"]],"explain":"These are directly represented in the field-type slides."},{"type":"match","topic":"Django Models & Fields","q":"Match the date/time behavior.","pairs":[["auto_now_add=True","Creation timestamp"],["auto_now=True","Update timestamp"],["DateField","Date without time"],["DateTimeField","Date and time together"]],"explain":"The Boolean/date slide shows these distinctions."},{"type":"tf","topic":"Django Models & Fields","q":"True or False: CharField is the Django field used for short text with a required maximum length.","explain":"The Product examples use CharField(max_length=120) for name.","answer":true},{"type":"tf","topic":"Django Models & Fields","q":"True or False: blank=True allows an empty value during validation/forms.","explain":"blank controls whether validation/forms allow an empty value.","answer":true},{"type":"scenario","topic":"Django Models & Fields","q":"A product description is optional, and you want forms to allow it to be empty without storing SQL NULL. Which setup matches the slides?","options":["TextField(blank=True)","TextField(null=True) only","CharField(unique=True)","BooleanField(default=True)"],"answer":0,"explain":"The slides use blank=True for an optional description while keeping database NULL behavior separate."},{"type":"order","topic":"Django Models & Fields","q":"Build the Product model fields in the order emphasized by the exercise.","items":["name","description","price","stock","is_active","available_from","created_at","product_image"],"answer":[0,1,2,3,4,5,6,7],"explain":"This mirrors the Product Model exercise sequence."},{"type":"mc","topic":"Meta & Constraints","q":"What is a cohesive model?","options":["It keeps related data and behavior together","It contains the entire application workflow","It has no fields","It contains every database feature"],"answer":0,"explain":"The cohesive model slide says related data and behavior should stay together."},{"type":"mc","topic":"Meta & Constraints","q":"What should model methods express?","options":["Behavior or calculations that belong to the record/instance","HTML layout","All application routing","Database backups"],"answer":0,"explain":"Model methods are for behavior owned by the model instance."},{"type":"mc","topic":"Meta & Constraints","q":"What does class Meta describe?","options":["Rules about the model as a whole","Only one field's validation","Only template rendering","Only URL patterns"],"answer":0,"explain":"The slides describe Meta as model-wide configuration."},{"type":"mc","topic":"Meta & Constraints","q":"Which Meta option sets default QuerySet ordering?","options":["ordering","db_table","verbose_name","constraints"],"answer":0,"explain":"The default ordering slide uses Meta.ordering."},{"type":"mc","topic":"Meta & Constraints","q":"Which Meta option sets a custom database table name?","options":["db_table","ordering","verbose_name_plural","indexes"],"answer":0,"explain":"db_table controls the physical database table name."},{"type":"mc","topic":"Meta & Constraints","q":"What does verbose_name control?","options":["Human-readable singular display name","Database column type","QuerySet ordering","Foreign-key deletion"],"answer":0,"explain":"The table/display names slide defines verbose_name as the singular label."},{"type":"mc","topic":"Meta & Constraints","q":"What does verbose_name_plural control?","options":["Human-readable plural display name","Primary key generation","SQL query order","Index storage"],"answer":0,"explain":"The slide uses verbose_name_plural for the plural label."},{"type":"mc","topic":"Meta & Constraints","q":"What is the main benefit of an index?","options":["Faster matching/ordering for queries that use the indexed field","Guarantees uniqueness","Replaces foreign keys","Prevents all updates"],"answer":0,"explain":"The index slide says indexes speed selected lookups/orderings but add storage/update work."},{"type":"mc","topic":"Meta & Constraints","q":"Why should indexes not be added everywhere?","options":["They add storage and work during inserts/updates","They make fields nullable","They remove primary keys","They disable QuerySets"],"answer":0,"explain":"The material explicitly warns against unnecessary indexes."},{"type":"mc","topic":"Meta & Constraints","q":"What does UniqueConstraint support?","options":["Uniqueness of a combination of fields","Only text length","Only timestamps","Only ordering"],"answer":0,"explain":"The example uses UniqueConstraint for name + category."},{"type":"mc","topic":"Meta & Constraints","q":"What does CheckConstraint enforce?","options":["A database condition on a row","A display label","A QuerySet sort","A template rule"],"answer":0,"explain":"The CheckConstraint slide shows conditions such as price >= 0 and stock >= 0."},{"type":"mc","topic":"Meta & Constraints","q":"Which layer is appropriate for a simple field rule such as unique or default?","options":["Field option","Database migration only","View","Template"],"answer":0,"explain":"The rule-placement table places simple one-field rules at the field option layer."},{"type":"mc","topic":"Meta & Constraints","q":"Which layer is shown for reusable application validation?","options":["Validator","Database table name","Meta.ordering","Template"],"answer":0,"explain":"The rule-placement table identifies Validator for reusable application validation."},{"type":"mc","topic":"Meta & Constraints","q":"Which layer answers a domain question such as is_available()?","options":["Model method","Field option","Meta","Database constraint"],"answer":0,"explain":"The model-method example uses is_available() for a domain question."},{"type":"match","topic":"Meta & Constraints","q":"Match the Meta option.","pairs":[["ordering","Default QuerySet order"],["db_table","Physical database table name"],["verbose_name","Singular human-readable label"],["verbose_name_plural","Plural human-readable label"]],"explain":"These four Meta options are explicitly shown."},{"type":"match","topic":"Meta & Constraints","q":"Match the rule layer to its use.","pairs":[["Field option","Simple one-field rule"],["Validator","Reusable application validation"],["Model clean()","Friendly model-level validation"],["Database constraint","State must be true in stored data"]],"explain":"This is the rule-placement table."},{"type":"tf","topic":"Meta & Constraints","q":"True or False: Meta ordering=['price'] sorts price in descending order by default.","explain":"The ordering slide uses a leading minus sign for descending order.","answer":false},{"type":"tf","topic":"Meta & Constraints","q":"True or False: db_table is the Meta option used to customize the database table name.","explain":"db_table is the model Meta option for a custom database table name.","answer":true},{"type":"scenario","topic":"Meta & Constraints","q":"The app frequently filters by SKU and status. What should you consider based on the index slide?","options":["Index the fields/queries the application actually performs","Index every field automatically","Remove all constraints","Use verbose_name"],"answer":0,"explain":"The slides recommend indexes based on actual query patterns."},{"type":"order","topic":"Meta & Constraints","q":"Place the rule decisions from simplest to strongest in the slide's conceptual layers.","items":["Field option","Validator","Model clean()","Database constraint","Model method"],"answer":[0,1,2,3,4],"explain":"The material presents different layers based on where the rule belongs; model methods answer domain questions."},{"type":"mc","topic":"Django Relationships","q":"Which Django field represents many-to-one?","options":["ForeignKey","OneToOneField","ManyToManyField","TextField"],"answer":0,"explain":"ForeignKey is used when many records can reference one parent."},{"type":"mc","topic":"Django Relationships","q":"Where should a ForeignKey normally be placed?","options":["On the many side","On the one side only","In Meta","In a template"],"answer":0,"explain":"The relationship field-placement slide says the ForeignKey belongs on the many side."},{"type":"mc","topic":"Django Relationships","q":"Which field represents one-to-one?","options":["OneToOneField","ForeignKey","ManyToManyField","JSONField"],"answer":0,"explain":"The slides use OneToOneField for Profile→User."},{"type":"mc","topic":"Django Relationships","q":"Which field represents many-to-many?","options":["ManyToManyField","ForeignKey","OneToOneField","BooleanField"],"answer":0,"explain":"ManyToManyField is used when both sides can have many records."},{"type":"mc","topic":"Django Relationships","q":"What does related_name provide?","options":["A readable reverse-access name","A database password","A primary key","An index automatically"],"answer":0,"explain":"The Book/Author example uses related_name='books' for reverse access."},{"type":"mc","topic":"Django Relationships","q":"What does on_delete=models.CASCADE mean in the examples?","options":["Delete dependent records when the referenced parent is deleted","Prevent deletion of the parent","Set every child to NULL","Create a new parent"],"answer":0,"explain":"The deletion behavior example uses CASCADE to delete dependent rows."},{"type":"mc","topic":"Django Relationships","q":"What does PROTECT do?","options":["Blocks deletion when dependent records exist","Deletes all dependent records","Sets the foreign key to NULL","Removes the relationship silently"],"answer":0,"explain":"The deletion behavior slide defines PROTECT as blocking deletion."},{"type":"mc","topic":"Django Relationships","q":"When can SET_NULL be used?","options":["When the foreign key allows NULL","Only when null=False","Only on many-to-many","Only for primary keys"],"answer":0,"explain":"The optional relationship example uses SET_NULL together with null=True."},{"type":"mc","topic":"Django Relationships","q":"What is an explicit through model useful for?","options":["Storing data about the relationship itself","Replacing every ForeignKey","Avoiding tables","Storing CSS"],"answer":0,"explain":"The Enrollment example stores status and relationship-specific data."},{"type":"mc","topic":"Django Relationships","q":"Why should comma-separated IDs not be used for relationships?","options":["It breaks relational normalization and proper relationships","It creates too many primary keys","It automatically creates an ERD","It is required by Django"],"answer":0,"explain":"The common mistakes slide warns that comma-separated IDs break normalization and relationship integrity."},{"type":"mc","topic":"Django Relationships","q":"Which example is self-referencing?","options":["A Category with a parent Category","Book to Author","Profile to User","Student to Course only"],"answer":0,"explain":"The slides show a ForeignKey to self for category hierarchies."},{"type":"mc","topic":"Django Relationships","q":"If a Book has an Author ForeignKey, how do you access the author from the book?","options":["book.author","author.books","book.objects.author","Book.Meta.author"],"answer":0,"explain":"The forward-access example is book.author."},{"type":"mc","topic":"Django Relationships","q":"With related_name='books', how can the author access its books?","options":["author.books.all()","author.book()","Book.author.all()","author.objects.books()"],"answer":0,"explain":"The reverse-access example uses author.books.all()."},{"type":"match","topic":"Django Relationships","q":"Match relationship type to field.","pairs":[["One-to-one","OneToOneField"],["Many-to-one","ForeignKey"],["Many-to-many","ManyToManyField"],["Hierarchy in one model","ForeignKey to self"]],"explain":"These mappings are shown in the relationship field selection slide."},{"type":"match","topic":"Django Relationships","q":"Match on_delete behavior.","pairs":[["CASCADE","Delete dependents"],["PROTECT","Block deletion"],["SET_NULL","Keep child and clear link to NULL"]],"explain":"These are the deletion behaviors shown."},{"type":"tf","topic":"Django Relationships","q":"True or False: A Book → Author many-to-one relationship is represented with ForeignKey.","explain":"The Book/Author example uses ForeignKey(Author, on_delete=models.CASCADE).","answer":true},{"type":"scenario","topic":"Django Relationships","q":"A Book may exist without an Author after the author is removed. Which combination matches the optional relationship example?","options":["SET_NULL + null=True","CASCADE + null=False","PROTECT + unique=True","ManyToManyField + blank=False"],"answer":0,"explain":"The optional relationship slide pairs SET_NULL with null=True."},{"type":"scenario","topic":"Django Relationships","q":"A Student and Course can each have many of the other, and Enrollment stores status. Which design fits the slides?","options":["ManyToManyField with an explicit through Enrollment model","OneToOneField","A comma-separated ID field","Only a BooleanField"],"answer":0,"explain":"The explicit through example uses Enrollment because the relationship has its own data."},{"type":"order","topic":"Django Relationships","q":"For a many-to-many relationship with relationship data, arrange the design.","items":["Identify Student and Course","Create Enrollment as the linking model","Add foreign keys to Student and Course","Store relationship-specific fields such as status"],"answer":[0,1,2,3],"explain":"This follows the Enrollment design shown."},{"type":"mc","topic":"Migrations","q":"What is a migration?","options":["A recorded schema change that can be applied and tracked","A QuerySet result","A template","A Python virtual environment"],"answer":0,"explain":"The migration material treats migrations as historical, repeatable schema changes."},{"type":"mc","topic":"Migrations","q":"What does makemigrations do?","options":["Creates migration files from model changes","Applies migrations to the database","Deletes migration history","Prints only SELECT queries"],"answer":0,"explain":"The migration workflow distinguishes creating migration files from applying them."},{"type":"mc","topic":"Migrations","q":"What does migrate do?","options":["Applies pending migrations to the database","Creates a model class","Shows only SQL text","Removes all rows"],"answer":0,"explain":"migrate moves the database through pending migration operations."},{"type":"mc","topic":"Migrations","q":"What does showmigrations help you inspect?","options":["Applied and unapplied migration files","Only model methods","Only table rows","Only templates"],"answer":0,"explain":"The migration status material shows applied/unapplied migration records."},{"type":"mc","topic":"Migrations","q":"What does migrate --plan show?","options":["The forward/reverse operations Django plans to run","The contents of every database row","The CSS generated by Django","The Python version"],"answer":0,"explain":"The slides use migrate --plan to preview planned operations."},{"type":"mc","topic":"Migrations","q":"What does sqlmigrate do?","options":["Shows the SQL for a migration without applying it","Applies a migration","Deletes a migration","Creates a QuerySet"],"answer":0,"explain":"The SQL inspection slide explicitly says sqlmigrate previews the SQL."},{"type":"mc","topic":"Migrations","q":"Which operation is used to rename a field?","options":["RenameField","AddField","RemoveField","RunPython"],"answer":0,"explain":"The schema operations slide uses RenameField for a rename."},{"type":"mc","topic":"Migrations","q":"Which operation adds a new field?","options":["AddField","RenameField","RunPython","RemoveField"],"answer":0,"explain":"AddField is the schema operation for adding a field."},{"type":"mc","topic":"Migrations","q":"Which operation removes a field?","options":["RemoveField","AddField","RenameField","RunSQL"],"answer":0,"explain":"RemoveField removes a field and can affect stored data."},{"type":"mc","topic":"Migrations","q":"Why can adding a required field to existing rows be risky?","options":["Existing rows need a value/backfill decision","Django always deletes the table","It removes all migrations","It prevents indexes"],"answer":0,"explain":"The slide explains that every existing row needs a valid value when a required field is introduced."},{"type":"mc","topic":"Migrations","q":"What is RunPython used for in the examples?","options":["Data migration logic such as backfilling values","Creating CSS","Rendering a template","Replacing the DBMS"],"answer":0,"explain":"The data migration slide uses RunPython to fill/clear values."},{"type":"mc","topic":"Migrations","q":"What does migration dependency information describe?","options":["Which migrations must exist before another migration can run","Which users can log in","Which templates render first","Which QuerySet is fastest"],"answer":0,"explain":"The dependency graph ensures required migration state exists first."},{"type":"mc","topic":"Migrations","q":"What is the safe schema-evolution sequence shown?","options":["Expand → Backfill → Switch code → Enforce → Clean up","Clean up → Enforce → Backfill → Expand","Switch code → Expand → Delete","Backfill → Clean up → Expand"],"answer":0,"explain":"The safe evolution slide explicitly shows Expand, Backfill, Switch code, Enforce, Clean up."},{"type":"mc","topic":"Migrations","q":"Why is a database backup part of migration discipline?","options":["It provides recovery protection before risky schema/data changes","It creates QuerySets","It replaces testing","It makes every migration reversible"],"answer":0,"explain":"The migration safety slide includes backup/recovery as operational protection."},{"type":"match","topic":"Migrations","q":"Match the migration command to its purpose.","pairs":[["makemigrations","Create migration files from model changes"],["migrate","Apply pending migrations"],["showmigrations","Show migration status"],["sqlmigrate","Inspect generated SQL"]],"explain":"These commands are shown as distinct migration workflow steps."},{"type":"match","topic":"Migrations","q":"Match schema operation to its action.","pairs":[["AddField","Add a column/field"],["RemoveField","Remove a field"],["RenameField","Rename a field"],["RunPython","Run data transformation logic"]],"explain":"The schema/data migration slides distinguish these operations."},{"type":"tf","topic":"Migrations","q":"True or False: sqlmigrate previews the SQL for a specified migration without applying it.","explain":"The slides show sqlmigrate with the app label and migration number.","answer":true},{"type":"tf","topic":"Migrations","q":"True or False: migrate --plan applies all pending migrations immediately.","explain":"migrate --plan previews the operations Django intends to perform.","answer":false},{"type":"scenario","topic":"Migrations","q":"You add a non-null field to a table that already has rows. What should you think about first?","options":["How existing rows will receive valid values","How to remove all migration history","How to disable the DBMS","How to make every field unique"],"answer":0,"explain":"The slide warns that existing rows need a value/backfill strategy."},{"type":"order","topic":"Migrations","q":"Put the safe schema-evolution sequence in order.","items":["Expand","Backfill","Switch code","Enforce","Clean up"],"answer":[0,1,2,3,4],"explain":"This is the exact sequence presented in the safe schema evolution slide."},{"type":"mc","topic":"CRUD with Django ORM","q":"What is the usual entry point for Product queries?","options":["Product.objects","Product.sql","Product.database","Product.fields"],"answer":0,"explain":"The CRUD slides use Product.objects as the manager entry point."},{"type":"mc","topic":"CRUD with Django ORM","q":"What is the role of a Manager?","options":["It starts queries for a model","It represents one database row","It is a migration file","It stores one field value"],"answer":0,"explain":"The Manager/QuerySet/Instance slide distinguishes the manager as the query starting point."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does all() return?","options":["A QuerySet containing every row","Exactly one object","A Boolean","An integer only"],"answer":0,"explain":"all() returns a QuerySet containing all rows."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does get() expect?","options":["Exactly one matching result","Any number of results","Only zero results","Only a count"],"answer":0,"explain":"get() returns one instance or raises when the result count is not exactly one."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does filter() return?","options":["A QuerySet of matching rows","One guaranteed instance","A migration file","A Boolean only"],"answer":0,"explain":"filter() builds a QuerySet for matching rows."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does filter(...).first() return?","options":["One instance or None","Always many rows","Always a Boolean","A migration"],"answer":0,"explain":"The result-shape slide shows first() as zero-or-one instance or None."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does filter(...).exists() return?","options":["True or False indicating presence","A full QuerySet","A model instance","A SQL string"],"answer":0,"explain":"exists() answers whether matching rows are present."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does filter(...).count() return?","options":["An integer count","A model instance","A Boolean","A migration file"],"answer":0,"explain":"count() returns the quantity of matching rows."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does save() do after changing an instance?","options":["Persists the changed fields","Creates a migration file","Only changes HTML","Deletes the row"],"answer":0,"explain":"The update-instance example changes the object and then calls save() to persist it."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does QuerySet.update() do?","options":["Updates all matching rows immediately","Updates only one loaded object","Creates a migration","Only validates data"],"answer":0,"explain":"The slides say update() performs an immediate bulk database update and returns the number changed."},{"type":"mc","topic":"CRUD with Django ORM","q":"Why might update() be useful for bulk changes?","options":["It updates all matching rows in one database operation","It creates one Python object per row first","It avoids all database work","It changes only templates"],"answer":0,"explain":"The material contrasts bulk update with loading one instance at a time."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does delete() do?","options":["Deletes the selected object or matching rows","Only marks a row as inactive","Creates a QuerySet","Creates a migration"],"answer":0,"explain":"The deletion slide shows instance delete() and QuerySet delete()."},{"type":"mc","topic":"CRUD with Django ORM","q":"Which exception is raised when get() finds no matching object?","options":["DoesNotExist","MultipleObjectsReturned","KeyError","IndexError"],"answer":0,"explain":"The missing-row example catches DoesNotExist."},{"type":"mc","topic":"CRUD with Django ORM","q":"Which exception is raised when get() finds more than one object?","options":["MultipleObjectsReturned","DoesNotExist","TypeError","FileNotFoundError"],"answer":0,"explain":"The duplicate-row example catches MultipleObjectsReturned."},{"type":"mc","topic":"CRUD with Django ORM","q":"Why is unique data important for one-row get() semantics?","options":["It supports the expectation that one lookup identifies one object","It disables validation","It removes primary keys","It makes QuerySets eager"],"answer":0,"explain":"The slides connect uniqueness with reliable one-row lookup semantics."},{"type":"mc","topic":"CRUD with Django ORM","q":"What does get_object_or_404 help with in a view?","options":["Retrieve an object or return a 404 response if missing","Create a migration","Bulk update every row","Sort a QuerySet"],"answer":0,"explain":"The CRUD-in-views slide uses get_object_or_404 for safe retrieval in a view."},{"type":"match","topic":"CRUD with Django ORM","q":"Match the ORM operation to the result/action.","pairs":[["all()","All matching rows as a QuerySet"],["get()","Exactly one instance"],["exists()","Presence as True/False"],["count()","Number of matching rows"]],"explain":"These result shapes are explicitly compared in the CRUD slides."},{"type":"match","topic":"CRUD with Django ORM","q":"Match the CRUD operation.","pairs":[["Create","objects.create()"],["Read","objects.all()/filter()/get()"],["Update","save()/update()"],["Delete","delete()"]],"explain":"The deck is organized around Create, Retrieve, Update, Delete."},{"type":"tf","topic":"CRUD with Django ORM","q":"True or False: objects.create() creates and saves an object immediately.","explain":"The CRUD deck identifies objects.create() as immediate create-and-save.","answer":true},{"type":"tf","topic":"CRUD with Django ORM","q":"True or False: filter(stock__gt=0) selects rows whose stock is greater than zero.","explain":"The examples use stock__gt=0 for products with positive stock.","answer":true},{"type":"tf","topic":"CRUD with Django ORM","q":"True or False: save(update_fields=[...]) can persist only selected changed fields.","explain":"The update-instance slide shows save(update_fields=[...]) for targeted persistence.","answer":true},{"type":"scenario","topic":"CRUD with Django ORM","q":"You need to deactivate every inactive category matching a condition, not one specific object. Which ORM style fits the slides?","options":["QuerySet.update(...)","get(...).save(...) for one row","objects.create(...)","sqlmigrate"],"answer":0,"explain":"The deck uses QuerySet.update() for immediate bulk changes."},{"type":"order","topic":"CRUD with Django ORM","q":"Put a safe single-object update flow in order.","items":["Retrieve the instance","Change the field in Python","Call save()","Return/continue the view"],"answer":[0,1,2,3],"explain":"The update-instance and view examples follow this pattern."},{"type":"mc","topic":"QuerySets & Lookups","q":"What is a QuerySet?","options":["A chainable description of a query that can produce model results","A database table itself","A migration file","A Python package"],"answer":0,"explain":"The QuerySet deck describes it as a chainable query representation."},{"type":"mc","topic":"QuerySets & Lookups","q":"Which QuerySet characteristic means query building normally does not hit the database immediately?","options":["Lazy","Independent","Unique","Static"],"answer":0,"explain":"Lazy evaluation delays database work until results are needed."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does chainable mean?","options":["QuerySet methods can refine a QuerySet into another QuerySet","Every call creates a new table","Queries cannot be reused","Only one filter is allowed"],"answer":0,"explain":"The deck emphasizes chaining filters, exclusions, ordering, and slicing."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does independent mean in the QuerySet characteristics?","options":["Deriving a QuerySet does not mutate the original QuerySet","Every QuerySet is a database table","All queries share the same result objects","QuerySets cannot be stored in variables"],"answer":0,"explain":"The slides show a reusable base condition and derived variants."},{"type":"mc","topic":"QuerySets & Lookups","q":"Without an explicit lookup, what does Django assume?","options":["Exact","Contains","Greater than","Is null"],"answer":0,"explain":"The field lookup grammar slide says the default lookup is exact."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does __icontains mean?","options":["Case-insensitive containment","Case-sensitive exact match","Greater than or equal","NULL check"],"answer":0,"explain":"The lookup slide defines icontains as case-insensitive containment."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does price__lt=100 mean?","options":["Price below 100","Price at least 100","Price above 100","Price exactly 100"],"answer":0,"explain":"lt means less than."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does price__lte=100 mean?","options":["Price 100 or below","Price below 100 only","Price above 100","Price exactly 100 only"],"answer":0,"explain":"lte means less than or equal to."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does price__gt=100 mean?","options":["Price above 100","Price below 100","Price 100 or below","Price exactly 100"],"answer":0,"explain":"gt means greater than."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does price__gte=100 mean?","options":["Price 100 or above","Price below 100","Price exactly 100 only","Price above 100 only"],"answer":0,"explain":"gte means greater than or equal to."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does price__range=(50,150) mean?","options":["Price between the range endpoints","Price must equal 50","Price must exceed 150","Price must be NULL"],"answer":0,"explain":"The comparison table shows range as between the endpoints."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does category__isnull=True test?","options":["Whether category is NULL","Whether category equals True","Whether category is empty text only","Whether category is unique"],"answer":0,"explain":"The slides explicitly warn that isnull checks SQL NULL, not a Boolean True value."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does exclude(...) do?","options":["Removes rows matching the exclusion conditions from the QuerySet","Deletes rows from the database","Creates a migration","Updates every row"],"answer":0,"explain":"exclude() refines the QuerySet by excluding matches; it does not delete database rows."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does order_by('price') do?","options":["Sorts the QuerySet by price ascending","Deletes expensive products","Filters price","Creates an index automatically"],"answer":0,"explain":"order_by() is used for ordering."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does order_by('-price') do?","options":["Sorts by price descending","Filters price below zero","Makes price unique","Returns one row"],"answer":0,"explain":"A leading minus reverses the field's ordering direction."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does slicing products[:5] do?","options":["Limits the result sequence to the first five positions","Deletes five rows","Updates five rows","Creates five migrations"],"answer":0,"explain":"The chaining/order/slicing slide shows slicing as result limiting."},{"type":"mc","topic":"QuerySets & Lookups","q":"What is the purpose of Q objects in the examples?","options":["Build complex conditions such as OR logic","Create primary keys","Rename fields","Store images"],"answer":0,"explain":"The deck uses Q objects for complex conditions."},{"type":"mc","topic":"QuerySets & Lookups","q":"What is the purpose of F expressions in the examples?","options":["Compare/use stored database field values in expressions","Create templates","Define migration dependencies","Create indexes"],"answer":0,"explain":"The field-comparison slide introduces F expressions for field-to-field/database-value comparisons."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does values() return?","options":["Dictionaries containing selected fields","Full model instances only","Only booleans","Migration files"],"answer":0,"explain":"The result-shape slide presents values() as a focused field dictionary shape."},{"type":"mc","topic":"QuerySets & Lookups","q":"What does values_list() return?","options":["Tuples or single selected values with flat=True","Only full model instances","Only SQL strings","Only counts"],"answer":0,"explain":"The result-shape slide describes tuples/single values for selected fields."},{"type":"mc","topic":"QuerySets & Lookups","q":"Why use exists() for a presence question?","options":["It asks only whether a match exists instead of needing the full result set","It creates a row","It changes the schema","It deletes the QuerySet"],"answer":0,"explain":"The deck lists exists() as a focused presence question."},{"type":"match","topic":"QuerySets & Lookups","q":"Match the lookup to its meaning.","pairs":[["__lt","Below"],["__lte","Below or equal"],["__gt","Above"],["__gte","Above or equal"],["__range","Between endpoints"]],"explain":"These lookup meanings are shown in the comparison table."},{"type":"match","topic":"QuerySets & Lookups","q":"Match the result-shaping operation.","pairs":[["values()","Selected fields as dictionaries"],["values_list()","Selected fields as tuples/values"],["exists()","Presence only"],["count()","Quantity only"]],"explain":"The result-shape slide contrasts these focused outputs."},{"type":"tf","topic":"QuerySets & Lookups","q":"True or False: __icontains performs a case-insensitive containment lookup.","explain":"The deck uses __icontains for case-insensitive containment.","answer":true},{"type":"tf","topic":"QuerySets & Lookups","q":"True or False: stock__gt means stock is less than the given value.","explain":"The examples use stock__gt=0.","answer":false},{"type":"scenario","topic":"QuerySets & Lookups","q":"You want products that are active AND have stock above zero. Which approach matches the slides?","options":["filter(is_active=True, stock__gt=0)","exclude(is_active=True) only","get(is_active=True) only","order_by('stock')"],"answer":0,"explain":"Multiple conditions in filter() are combined as conditions that must all match."},{"type":"scenario","topic":"QuerySets & Lookups","q":"You need products that are NOT in the Clearance category, then sorted by price. Which chain fits?","options":["exclude(category='Clearance').order_by('price')","delete(category='Clearance')","get(category='Clearance').order_by('price')","sqlmigrate"],"answer":0,"explain":"The chaining slide demonstrates exclusion followed by ordering."},{"type":"order","topic":"QuerySets & Lookups","q":"Build the reusable QuerySet refinement in order.","items":["Start with Product.objects","filter(...)","exclude(...)","order_by(...)","slice if needed"],"answer":[0,1,2,3,4],"explain":"The deck emphasizes chaining refinements before evaluation."},{"type":"scenario","topic":"Exam Challenge","q":"A field is required in the database, must be unique, and is frequently searched. Which combination directly matches the slide concepts?","options":["null=False + unique=True + an index when the query pattern justifies it","blank=True only","db_table + ordering","CASCADE + SET_NULL"],"answer":0,"explain":"The slides separate required storage, uniqueness, and query-performance decisions."},{"type":"scenario","topic":"Exam Challenge","q":"A model has price and stock. The database must reject negative values even if another code path bypasses form validation. Which layer fits best?","options":["Database CheckConstraint","Template validation only","verbose_name","QuerySet slicing"],"answer":0,"explain":"The constraint material says database constraints protect stored state."},{"type":"scenario","topic":"Exam Challenge","q":"A relationship can be missing, and when the parent is deleted the child should remain. Which relationship design matches the examples?","options":["ForeignKey with null=True and SET_NULL","CASCADE with null=False","OneToOneField only","ManyToManyField only"],"answer":0,"explain":"This combines the optional relationship and SET_NULL examples."},{"type":"scenario","topic":"Exam Challenge","q":"You need a many-to-many relationship but the relationship stores status. Which design is the slide's answer?","options":["ManyToManyField with through=Enrollment","Comma-separated IDs","OneToOneField","A single TextField"],"answer":0,"explain":"The through-model example stores relationship-specific status."},{"type":"scenario","topic":"Exam Challenge","q":"You changed a model and want to inspect the exact SQL Django plans for migration 004 without applying it. What do you use?","options":["sqlmigrate","migrate","makemigrations","showmigrations"],"answer":0,"explain":"sqlmigrate previews the SQL without applying the migration."},{"type":"scenario","topic":"Exam Challenge","q":"You need exactly one Product by a unique SKU and want missing/duplicate cases to be explicit. Which ORM operation is emphasized?","options":["get()","all()","values()","order_by()"],"answer":0,"explain":"The CRUD deck connects get() with exactly-one semantics and DoesNotExist/MultipleObjectsReturned."},{"type":"scenario","topic":"Exam Challenge","q":"You need to change a flag on many matching products immediately. Which ORM operation fits?","options":["QuerySet.update()","instance.save() after loading only one object","objects.create()","sqlmigrate"],"answer":0,"explain":"The CRUD deck uses update() for bulk matching rows."},{"type":"scenario","topic":"Exam Challenge","q":"You need a yes/no answer to whether any active products exist. Which result shape fits?","options":["exists()","all()","values_list()","get()"],"answer":0,"explain":"The QuerySet deck identifies exists() as a focused presence question."},{"type":"scenario","topic":"Exam Challenge","q":"A Product model should expose is_available() based on its own state and stock. Where does the model design material place that rule?","options":["Model method","Template","Migration dependency","Meta.db_table"],"answer":0,"explain":"The model-method slide uses is_available() as a domain question owned by the model."},{"type":"match","topic":"Exam Challenge","q":"Match the problem to the most direct Django concept.","pairs":[["Many records reference one parent","ForeignKey"],["One dependent record per parent","OneToOneField"],["Many on both sides","ManyToManyField"],["Relationship needs extra data","through model"]],"explain":"The relationship selection slide maps business shape to Django relationship fields."},{"type":"match","topic":"Exam Challenge","q":"Match the migration safety stage to its purpose.","pairs":[["Expand","Add the new structure"],["Backfill","Populate/verify existing data"],["Switch code","Read/write using the new structure"],["Enforce","Add required/unique/check rules"],["Clean up","Remove old structure after migration"]],"explain":"This is the safe schema evolution sequence."},{"type":"tf","topic":"Exam Challenge","q":"True or False: null concerns database storage, while blank concerns validation/forms.","explain":"The slides explicitly distinguish database storage from validation/forms.","answer":true},{"type":"tf","topic":"Exam Challenge","q":"True or False: price__gte means price is greater than or equal to the given value.","explain":"gte means greater than or equal to.","answer":true},{"type":"tf","topic":"Exam Challenge","q":"True or False: Meta.ordering controls the model's default QuerySet ordering.","explain":"Meta.ordering controls default QuerySet ordering.","answer":true},{"type":"tf","topic":"Exam Challenge","q":"True or False: showmigrations displays migration status.","explain":"showmigrations is the status inspection command.","answer":true},{"type":"order","topic":"Exam Challenge","q":"Put a typical Django schema-change workflow in order.","items":["Change models.py","Run makemigrations","Review migration","Run migrate","Verify the result"],"answer":[0,1,2,3,4],"explain":"This combines the migration workflow concepts shown across the deck."}];
+
+// No typed answers in this version: legacy short-answer records are converted to True/False.
+function normalizeLegacyTypes(){
+  BANK.forEach(q=>{
+    if(q.type==="short"){
+      q.type="tf";
+      q.q="True or False: "+q.q;
+      q.answer=true;
+      delete q.answers;
+    }
+  });
+}
+normalizeLegacyTypes();
+
+const CORE_TOPICS = ["Database & RDBMS","Relational Design","Django Models & Fields","Meta & Constraints","Django Relationships","Migrations","CRUD with Django ORM","QuerySets & Lookups"];
+const LETTERS=["A","B","C","D"];
+let round=[], index=0, score=0, answered=false, stats={};
+
+const $=id=>document.getElementById(id);
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+
+function setTopicOptions(){
+  $("topicSelect").innerHTML="";
+  [...CORE_TOPICS,"Exam Challenge"].forEach(t=>{
+    const o=document.createElement("option");o.value=t;o.textContent=t;$("topicSelect").appendChild(o);
+  });
+}
+// Defensive check: every choice question has exactly one correct option index.
+BANK.forEach((q,i)=>{
+  if((q.type==="mc"||q.type==="scenario") && (!Number.isInteger(q.answer) || q.answer<0 || q.answer>=q.options.length)){
+    throw new Error(`Invalid single-answer question at BANK index ${i}`);
+  }
+});
+
+setTopicOptions();
+
+$("modeSelect").onchange=()=>{
+  $("topicBox").classList.toggle("hidden",$("modeSelect").value!=="topic");
+};
+
+function balancedRound(){
+  let selected=[];
+  CORE_TOPICS.forEach(topic=>{
+    const pool=BANK.filter(q=>q.topic===topic);
+    selected.push(...shuffle(pool).slice(0,5));
+  });
+  // Add five mixed exam questions so the 45-question exam feels integrated.
+  selected.push(...shuffle(BANK.filter(q=>q.topic==="Exam Challenge")).slice(0,5));
+  return shuffle(selected);
+}
+function buildRound(){
+  const mode=$("modeSelect").value;
+  if(mode==="exam") return balancedRound();
+  if(mode==="full") return shuffle(BANK);
+  return shuffle(BANK.filter(q=>q.topic===$("topicSelect").value));
+}
+
+function start(){
+  round=buildRound(); index=0; score=0; stats={}; answered=false;
+  $("startScreen").classList.add("hidden");
+  $("resultScreen").classList.add("hidden");
+  $("gameScreen").classList.remove("hidden");
+  window.scrollTo(0,0);
+  render();
+}
+
+function typeName(t){
+  return ({mc:"Multiple Choice",scenario:"Scenario",tf:"True / False",match:"Match & Connect",order:"Put in Order"})[t]||t;
+}
+function base(){
+  $("counter").textContent=`Question ${index+1} of ${round.length}`;
+  $("score").textContent=score;
+  $("progressBar").style.width=`${(index/round.length)*100}%`;
+  $("topic").textContent=round[index].topic;
+  $("qtype").textContent=typeName(round[index].type);
+  $("question").textContent=round[index].q;
+  $("feedback").className="feedback hidden";
+  $("feedback").innerHTML="";
+  $("nextBtn").disabled=true;
+  $("status").textContent="Choose your answer";
+  $("answerArea").innerHTML="";
+  answered=false;
+}
+function render(){
+  const q=round[index]; base();
+  if(q.type==="mc"||q.type==="scenario"){
+    const area=$("answerArea"), wrap=document.createElement("div");wrap.className="options";
+    shuffle(q.options.map((text,i)=>({text,old:i}))).forEach((o,i)=>{
+      const b=document.createElement("button");b.className="opt";
+      b.dataset.optionIndex=String(o.old);
+      b.innerHTML=`<span class="letter">${LETTERS[i]}</span><span>${escapeHtml(o.text)}</span>`;
+      b.onclick=()=>chooseMC(i,o.old,q,b,wrap);
+      wrap.appendChild(b);
+    }); area.appendChild(wrap);
+  }else if(q.type==="tf"){
+    const area=$("answerArea"),wrap=document.createElement("div");wrap.className="options";
+    [true,false].forEach((v,i)=>{
+      const b=document.createElement("button");b.className="opt";
+      b.innerHTML=`<span class="letter">${i?"F":"T"}</span><span>${v?"True":"False"}</span>`;
+      b.onclick=()=>chooseTF(v,q,b,wrap);wrap.appendChild(b);
+    });area.appendChild(wrap);
+  }else if(q.type==="match") renderMatch(q);
+    else if(q.type==="order") renderOrder(q);
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+
+function finishAnswer(correct,q){
+  answered=true;
+  if(correct)score++;
+  stats[q.topic]??={correct:0,total:0};stats[q.topic].total++;if(correct)stats[q.topic].correct++;
+  $("score").textContent=score;
+  $("feedback").className="feedback";
+  $("feedback").innerHTML=`<b>${correct?"Correct ✓":"Review ✗"}</b><br>${escapeHtml(q.explain)}`;
+  $("nextBtn").disabled=false;
+  $("status").textContent=correct?"Correct — keep going.":"Check the explanation, then continue.";
+}
+function chooseMC(shown,actual,q,clicked,wrap){
+  if(answered)return;
+  const buttons=[...wrap.children];
+  buttons.forEach(b=>b.disabled=true);
+
+  // Exactly one correct option: the option whose original index equals q.answer.
+  buttons.forEach(b=>{
+    const optionIndex=Number(b.dataset.optionIndex);
+    if(optionIndex===q.answer) b.classList.add("correct");
+  });
+  if(actual!==q.answer) clicked.classList.add("wrong");
+
+  finishAnswer(actual===q.answer,q);
+}
+
+function chooseTF(v,q,clicked,wrap){
+  if(answered)return;[...wrap.children].forEach(b=>b.disabled=true);
+  const correct=v===q.answer;
+  [...wrap.children].forEach(b=>{if((b.querySelector("span:last-child").textContent==="True")===q.answer)b.classList.add("correct")});
+  if(!correct)clicked.classList.add("wrong");finishAnswer(correct,q);
+}
+
+function renderMatch(q){
+  const area=$("answerArea"), grid=document.createElement("div");grid.className="match-grid";
+  const right=shuffle(q.pairs.map(p=>p[1]));
+  q.pairs.forEach((p,i)=>{
+    const row=document.createElement("div");row.className="match-row";
+    const left=document.createElement("div");left.className="left";left.textContent=p[0];
+    const sel=document.createElement("select");sel.dataset.i=i;
+    const blank=document.createElement("option");blank.value="";blank.textContent="Choose a match…";sel.appendChild(blank);
+    right.forEach((r,j)=>{const o=document.createElement("option");o.value=r;o.textContent=r;sel.appendChild(o)});
+    row.append(left,sel);grid.appendChild(row);
+  });
+  area.appendChild(grid);
+  const btn=document.createElement("button");btn.className="submit-type";btn.textContent="Check Matches";
+  btn.onclick=()=>checkMatch(q,grid);area.appendChild(btn);
+}
+function checkMatch(q,grid){
+  if(answered)return;
+  const sels=[...grid.querySelectorAll("select")];
+  const correct=sels.every((s,i)=>s.value===q.pairs[i][1]);
+  sels.forEach((s,i)=>{
+    s.disabled=true;
+    s.style.borderColor=s.value===q.pairs[i][1]?"rgba(73,225,155,.7)":"rgba(255,109,142,.7)";
+  });
+  finishAnswer(correct,q);
+}
+
+function renderShort(q){
+  const area=$("answerArea");
+  const input=document.createElement("input");input.className="short-input";input.placeholder="Type the short answer…";
+  area.appendChild(input);
+  const hint=document.createElement("div");hint.className="hint";hint.textContent="Answer with one term, method, lookup, option, or command.";
+  area.appendChild(hint);
+  const btn=document.createElement("button");btn.className="submit-type";btn.textContent="Check Answer";
+  btn.onclick=()=>{
+    if(answered)return;
+    const value=input.value.trim().toLowerCase().replace(/\s+/g," ");
+    const expected=q.answers[0].toLowerCase().replace(/\s+/g," ");
+    const correct=value===expected;
+    input.disabled=true;btn.disabled=true;finishAnswer(correct,q);
+  };
+  area.appendChild(btn);input.focus();
+}
+
+function renderOrder(q){
+  const area=$("answerArea"),list=document.createElement("div");list.className="order-list";
+  const items=shuffle(q.items.map((text,i)=>({text,old:i})));
+  const chosen=[];
+  items.forEach(o=>{
+    const b=document.createElement("button");b.className="order-item";b.textContent=o.text;
+    b.onclick=()=>{
+      if(answered||b.classList.contains("selected"))return;
+      b.classList.add("selected");chosen.push(o.old);
+      b.textContent=`${chosen.length}. ${o.text}`;
+      if(chosen.length===items.length){
+        const correct=chosen.every((v,i)=>v===q.answer[i]);
+        [...list.children].forEach(x=>x.disabled=true);
+        finishAnswer(correct,q);
+      }
+    };list.appendChild(b);
+  });
+  const hint=document.createElement("div");hint.className="hint";hint.textContent="Click an item to select it. Click it again to change your choice before submitting.";
+  area.append(list,hint);
+}
+
+$("nextBtn").onclick=()=>{
+  if(index<round.length-1){index++;render()}else finish();
+};
+function finish(){
+  $("gameScreen").classList.add("hidden");$("resultScreen").classList.remove("hidden");window.scrollTo(0,0);
+  const pct=Math.round(score/round.length*100);
+  $("finalScore").textContent=`${score} / ${round.length}`;
+  $("resultTitle").textContent=pct>=90?"Excellent revision run!":pct>=75?"Strong understanding!":pct>=60?"Good progress — review the missed areas.":"Keep practicing the concepts and try again.";
+  $("resultNote").textContent=`${pct}% correct. The score reflects only the questions answered in this run.`;
+  const bd=$("breakdown");bd.innerHTML="";
+  Object.entries(stats).sort((a,b)=>b[1].correct/b[1].total-a[1].correct/a[1].total).forEach(([t,s])=>{
+    const d=document.createElement("div");d.innerHTML=`<b>${escapeHtml(t)}</b><span>${s.correct} / ${s.total} correct</span>`;bd.appendChild(d);
+  });
+}
+$("startBtn").onclick=start;
+$("againBtn").onclick=start;
+$("homeBtn").onclick=()=>{
+  $("resultScreen").classList.add("hidden");$("gameScreen").classList.add("hidden");$("startScreen").classList.remove("hidden");window.scrollTo(0,0);
+};
+
+/* Allow users to change their mind before submitting an ordering answer. */
+document.addEventListener("click", function(e) {
+  const item = e.target.closest(".order-item, .sort-item, .match-item");
+  if (!item) return;
+  if (item.dataset.locked === "true") return;
+  if (item.classList.contains("selected") || item.classList.contains("active")) {
+    item.classList.remove("selected", "active");
+  }
+});
+
+</script>
+</body>
+</html>
